@@ -1,0 +1,139 @@
+
+
+System Details : MacOS, Apple M1 chip, ARM64
+
+Pre-requisites :
+1. Java version 11+ should be installed and added as system default.
+2. Curl and Tree should be installed.
+3. Home brew should be installed and updated.
+
+
+Steps and Commands :
+
+1. Install Hyperledger Besu - 
+	
+	brew tap hyperledger/besu
+	brew install besu
+
+2. Check if Besu is installed correctly - 
+
+	besu --version
+
+My Besu version is : besu/v23.7.1/osx-aarch_64/openjdk-java-20
+
+3. Create a new directory to store all network files. I have created this on desktop.
+   
+	mkdir besu_private_network
+
+4. Create separate folders for validator nodes. We will have 7 validator nodes so make 7 nested folders.
+	
+	cd besu_private_network
+	mkdir -p node1/data
+	mkdir -p node2/data
+	mkdir -p node3/data
+	mkdir -p node4/data
+	mkdir -p node5/data
+	mkdir -p node6/data
+	mkdir -p node7/data
+
+5. "ibftConfigFile.json" file is created and added to the besu_private_network folder.
+   The configuration file defines the IBFT 2.0 genesis file and the number of node key pairs to generate (7 in our case, one for each validator node).
+
+6. Generate node keys and genesis file - 
+
+	besu operator generate-blockchain-config --config-file=ibftConfigFile.json --to=networkFiles --private-key-file-name=key
+
+7. Genesis file will be created in the folder "networkFiles" by default.
+   We move it out to the main directory.
+   
+	mv networkFiles/genesis.json genesis.json
+
+8. Next, we move the key and key.pub files to respective node folders
+	
+	mv networkFiles/keys/0x7c42f2eda30cfee9abeb60c3cee91c6876c7e136/key.pub node1/data/
+	mv networkFiles/keys/0x7c42f2eda30cfee9abeb60c3cee91c6876c7e136/key node1/data/
+
+	mv networkFiles/keys/0xe9e985a9a84df72a2fc8d0e739225d64b92ded17/key.pub node2/data/
+	mv networkFiles/keys/0xe9e985a9a84df72a2fc8d0e739225d64b92ded17/key node2/data/
+
+	mv networkFiles/keys/0x92e23b7f5f3cefa835f4382fbcdfec53b24d45d0/key.pub node3/data/
+	mv networkFiles/keys/0x92e23b7f5f3cefa835f4382fbcdfec53b24d45d0/key node3/data/
+
+	mv networkFiles/keys/0xf3e1ebee8093996ebd6fc9ea6f5e96c915e2815a/key.pub node4/data/
+	mv networkFiles/keys/0xf3e1ebee8093996ebd6fc9ea6f5e96c915e2815a/key node4/data/
+
+	mv networkFiles/keys/0xd0b9e268170804703c2b51d121dab7639f512c63/key.pub node5/data/
+	mv networkFiles/keys/0xd0b9e268170804703c2b51d121dab7639f512c63/key node5/data/
+
+	mv networkFiles/keys/0xff30f4665e4710cb0d861f33f16db44ec45e15cd/key.pub node6/data/
+	mv networkFiles/keys/0xff30f4665e4710cb0d861f33f16db44ec45e15cd/key node6/data/
+
+	mv networkFiles/keys/0xde852c5136b5936553184ac67b368155eb815425/key.pub node7/data/
+	mv networkFiles/keys/0xde852c5136b5936553184ac67b368155eb815425/key node7/data/
+
+9. Configure node-1 as boot node. Enable both RCP options - HTTP (default port 8545) and Websocket (default port 8546)
+   Since this is a sample project, we are allowing all connections. In an organisational setup, only authorised connections should be added here.
+
+	besu --data-path=data --genesis-file=../genesis.json --rpc-ws-enabled  --rpc-http-enabled --rpc-http-api=ETH,NET,IBFT --host-allowlist="*" --rpc-http-cors-origins=“all"
+   
+   This will setup the boot node and give enode address. 
+   My enode address : enode://f034a0145a35345aecd5b5306d616f390a60450fa470ab29080e6c898e797bcabdec0f9f9d83a729882ef908e65d66fe766f48fb75b417eb7e9ebbfcfc9642f1@127.0.0.1:30303
+
+
+10. Start node-2. Enable both RCP options - HTTP (port 8547) and Websocket (port 8548)
+	
+besu --data-path=data --genesis-file=../genesis.json --bootnodes=enode://f034a0145a35345aecd5b5306d616f390a60450fa470ab29080e6c898e797bcabdec0f9f9d83a729882ef908e65d66fe766f48fb75b417eb7e9ebbfcfc9642f1@127.0.0.1:30303 --p2p-port=30304 --rpc-ws-enabled —-rpc-ws-port=8548 --rpc-http-enabled --rpc-http-api=ETH,NET,IBFT --host-allowlist="*" --rpc-http-cors-origins="all" --rpc-http-port=8547
+
+
+11. Start node-3. Enable both RCP options - HTTP (port 8549) and Websocket (port 8550)
+
+
+besu --data-path=data --genesis-file=../genesis.json --bootnodes==enode://f034a0145a35345aecd5b5306d616f390a60450fa470ab29080e6c898e797bcabdec0f9f9d83a729882ef908e65d66fe766f48fb75b417eb7e9ebbfcfc9642f1@127.0.0.1:30303 --p2p-port=30305 --rpc-ws-enabled --rpc-ws-port=8550 --rpc-http-enabled --rpc-http-api=ETH,NET,IBFT --host-allowlist="*" --rpc-http-cors-origins="all" --rpc-http-port=8549
+
+
+12. To start node-4. Enable both RCP options - HTTP (port 8551) and Websocket (port 8552)
+
+
+besu --data-path=data --genesis-file=../genesis.json --bootnodes=enode://f034a0145a35345aecd5b5306d616f390a60450fa470ab29080e6c898e797bcabdec0f9f9d83a729882ef908e65d66fe766f48fb75b417eb7e9ebbfcfc9642f1@127.0.0.1:30303 --p2p-port=30306 --rpc-ws-enabled --rpc-ws-port=8552 --rpc-http-enabled --rpc-http-api=ETH,NET,IBFT --host-allowlist="*" --rpc-http-cors-origins="all" --rpc-http-port=8551 
+
+
+13. To start node-5. Enable both RCP options - HTTP (port 8553) and Websocket (port 8554)
+
+
+besu --data-path=data --genesis-file=../genesis.json --bootnodes=enode://f034a0145a35345aecd5b5306d616f390a60450fa470ab29080e6c898e797bcabdec0f9f9d83a729882ef908e65d66fe766f48fb75b417eb7e9ebbfcfc9642f1@127.0.0.1:30303 --p2p-port=30307 --rpc-ws-enabled --rpc-ws-port=8554 --rpc-http-enabled --rpc-http-api=ETH,NET,IBFT --host-allowlist="*" --rpc-http-cors-origins="all" --rpc-http-port=8553 
+
+
+
+14. To start node-6. Enable both RCP options - HTTP (port 8555) and Websocket (port 8556)
+
+
+besu --data-path=data --genesis-file=../genesis.json --bootnodes=enode://f034a0145a35345aecd5b5306d616f390a60450fa470ab29080e6c898e797bcabdec0f9f9d83a729882ef908e65d66fe766f48fb75b417eb7e9ebbfcfc9642f1@127.0.0.1:30303 --p2p-port=30308 --rpc-ws-enabled --rpc-ws-port=8556 --rpc-http-enabled --rpc-http-api=ETH,NET,IBFT --host-allowlist="*" --rpc-http-cors-origins="all" --rpc-http-port=8555 
+
+
+
+15. To start node-7. Enable both RCP options - HTTP (port 8557) and Websocket (port 8558)
+
+
+besu --data-path=data --genesis-file=../genesis.json --bootnodes=enode://f034a0145a35345aecd5b5306d616f390a60450fa470ab29080e6c898e797bcabdec0f9f9d83a729882ef908e65d66fe766f48fb75b417eb7e9ebbfcfc9642f1@127.0.0.1:30303 --p2p-port=30309 --rpc-ws-enabled --rpc-ws-port=8558 --rpc-http-enabled --rpc-http-api=ETH,NET,IBFT --host-allowlist="*" --rpc-http-cors-origins="all" --rpc-http-port=8557 
+
+
+16. Verify that all the nodes are running properly
+
+	curl -X POST --data '{"jsonrpc":"2.0","method":"ibft_getValidatorsByBlockNumber","params":["latest"], "id":1}' localhost:8545
+
+    This should return the address of all the validator nodes. If it shows 7 nodes, means all the nodes are successfully set up.
+
+
+
+After all 7 validator nodes are up and running, block creation will start. Now we can perform transactions or run smart contract / dApp on the network.
+
+
+
+
+
+
+
+
+
+
+
